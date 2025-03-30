@@ -18,3 +18,4 @@ for (var i = 0; i < rolls.length; i++) {
     totals[rolls[i] - 1]++;
 }
 console.log(totals);
+
