@@ -5,16 +5,16 @@ const ctx = canvas.getContext("2d");
 
 
 //set variables
-const rows = 40;
-const columns = 80;
+const rows = 80;
+const columns = 160;
 const width = canvas.width / columns;
 const height = canvas.height / rows;
-const radius = 2.5 ;
-const padding = 5 ;
+const radius = 2.5 / 2;
+const padding = 5 / 2; 
 
 const backgroundColor = "rgb(222,199,160)";
 
-const shadowOffset = 1;
+const shadowOffset = 1.4 / 2;
 const shadowColor = "black";
 
 const drawBorders = false;
@@ -40,6 +40,10 @@ class Dice {
         this.width = width * size;
         this.height = height * size;
 
+        let velocity = 0;
+        let acceleration = -1;
+
+
     }
 
     drawCircle(x,y,r) {
@@ -51,6 +55,7 @@ class Dice {
 
     drawShadow() {
         ctx.fillStyle = this.shadowColor;
+        ctx.strokeStyle = this.shadowColor;
 
         if (this.n == 1) {
 
@@ -109,7 +114,8 @@ class Dice {
             }
         }
     }
-    drawDice() {
+
+    draw() {
 
         ctx.fillStyle = backgroundColor;
         ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -184,18 +190,44 @@ class Dice {
 
     }
 
-    rollDice() {
+    update() {
+        if (this.velocity < 2000) {
             
+            
+            setTimeout(() => { 
+                this.increment();
+                this.draw();
+                
+                console.log(this.velocity + " " + this.acceleration);
+            }, this.velocity);
+            this.velocity *= this.acceleration;
+            
+        } else {
+            this.acceleration = -1;
+        }
+
+    }
+
+    increment() {
         if (this.n <= 6 && this.n > 0) {
             this.n++;
+            this.rotate = Math.round(Math.random());
             if (this.n == 7) {
                 this.n = 1;
             }
             console.log("Dice at (" + Math.floor(this.x/this.width) + ", " + Math.floor(this.y/this.height) +") incremented");
-            this.drawDice(ctx);
+            this.draw();
         } else {
             console.log("oopsies dice out of bounds here");
         }
+    }
+
+    roll() {
+        if (this.acceleration < 0) {
+            this.acceleration = 1.1 + (Math.random() * 0.1);
+            this.velocity = 50 * Math.random() + 20;
+            this.update();
+        }  
     }
 }
 
@@ -216,7 +248,7 @@ canvas.addEventListener("click", function (e) {
         b = 1;
     } 
 
-    dice[i-b][j-a].rollDice();
+    dice[i-b][j-a].roll();
 
 
     
@@ -264,7 +296,7 @@ function render() {
         for (let j = 0; j < rows; j++) {
 
             if (dice[i][j] != -1 && dice[i][j] != -2 && dice[i][j] != -3) { 
-                dice[i][j].drawDice();
+                dice[i][j].draw();
             }
             
             
@@ -293,3 +325,16 @@ function render() {
 initialize();
 render()
 
+
+let updateDice = function() {
+    requestAnimationFrame(updateDice);
+    for (let i = 0; i < columns; i++) {
+        for (let j = 0; j < rows; j++) {
+            if (dice[i][j] != -1 && dice[i][j] != -2 && dice[i][j] != -3) { 
+                dice[i][j].update();
+            }
+        }
+    }
+}
+
+updateDice();
