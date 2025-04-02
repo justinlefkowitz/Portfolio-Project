@@ -1,20 +1,22 @@
 //initialize canvas
 const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('dice'))
 const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 
 
 //set variables
-const rows = 80;
-const columns = 160;
+const rows = 40;
+const columns = 80;
 const width = canvas.width / columns;
 const height = canvas.height / rows;
-const radius = 2.5 / 2;
-const padding = 5 / 2; 
+const radius = Math.min(width, height) / 10; 
+const padding = Math.min(width, height) / 5; 
 
 const backgroundColor = "rgb(222,199,160)";
 
-const shadowOffset = 1.4 / 2;
+const shadowOffset = radius / 2;
 const shadowColor = "black";
 
 const drawBorders = false;
@@ -40,170 +42,153 @@ class Dice {
         this.width = width * size;
         this.height = height * size;
 
-        let velocity = 0;
-        let acceleration = -1;
-
+        let velocity;
+        let acceleration;
+        let target = n;
+        let isRolling = false;
 
     }
 
-    drawCircle(x,y,r) {
-        ctx.beginPath()
-        ctx.arc(x,y,r,0,2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
+    drawCircle(context, x,y,r) {
+        context.beginPath()
+        context.arc(x,y,r,0,2 * Math.PI);
+        context.fill();
+        context.stroke();
     }
 
-    drawShadow() {
-        ctx.fillStyle = this.shadowColor;
-        ctx.strokeStyle = this.shadowColor;
+    drawShadow(context) {
+        context.fillStyle = this.shadowColor;
+        context.strokeStyle = this.shadowColor;
 
         if (this.n == 1) {
 
-            this.drawCircle(this.x + this.width/2 + this.shadowOffset, this.y + this.height/2 + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.width/2 + this.shadowOffset, this.y + this.height/2 + this.shadowOffset, this.radius);
 
         } else if (this.n == 2) {
 
             if (this.rotate == true) {
-                this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
-                this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
             } else {
-                this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
-                this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
             }
             
         } else if (this.n == 3) {
 
-            this.drawCircle(this.x + this.width/2 + this.shadowOffset, this.y + this.height/2 + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.width/2 + this.shadowOffset, this.y + this.height/2 + this.shadowOffset, this.radius);
 
             if (this.rotate == true) {
-                this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
-                this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
             } else {
-                this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
-                this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
             }
             
         } else if (this.n == 4) {
 
-            this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
-            this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
-            this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
-            this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
 
         } else if (this.n == 5) {
             
-            this.drawCircle(this.x + this.width/2 + this.shadowOffset, this.y + this.height/2 + this.shadowOffset, this.radius);
-            this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
-            this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
-            this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
-            this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.width/2 + this.shadowOffset, this.y + this.height/2 + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
             
         } else if (this.n == 6) {
 
-            this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
-            this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
-            this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
-            this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
 
             if (this.rotate == true) {
-                this.drawCircle(this.x + this.width/2 + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
-                this.drawCircle(this.x + this.width/2 + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.width/2 + this.shadowOffset, this.y + this.padding + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.width/2 + this.shadowOffset, this.y + this.height - this.padding + this.shadowOffset, this.radius);
             } else {
-                this.drawCircle(this.x + this.padding + this.shadowOffset, this.y + this.height/2 + this.shadowOffset, this.radius);
-                this.drawCircle(this.x + this.width - this.padding + this.shadowOffset, this.y + this.height/2 + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.padding + this.shadowOffset, this.y + this.height/2 + this.shadowOffset, this.radius);
+                this.drawCircle(context, this.x + this.width - this.padding + this.shadowOffset, this.y + this.height/2 + this.shadowOffset, this.radius);
             }
         }
     }
 
-    draw() {
+    draw(context) {
 
-        ctx.fillStyle = backgroundColor;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        context.fillStyle = backgroundColor;
+        context.fillRect(this.x, this.y, this.width, this.height);
 
         if (this.isBorder) {
-            ctx.strokeStyle = "black";
-            ctx.strokeRect(this.x, this.y, this.width, this.height);
+            context.strokeStyle = "black";
+            context.strokeRect(this.x, this.y, this.width, this.height);
         }
         
-        this.drawShadow()
+        this.drawShadow(context)
         //color setting
-        ctx.fillStyle = this.color;
-        ctx.strokeStyle = this.color;
+        context.fillStyle = this.color;
+        context.strokeStyle = this.color;
 
         //dice value drawing
         if (this.n == 1) {
 
-            this.drawCircle(this.x + this.width/2, this.y + this.height/2, this.radius);
+            this.drawCircle(context, this.x + this.width/2, this.y + this.height/2, this.radius);
 
         } else if (this.n == 2) {
 
             if (this.rotate == true) {
-                this.drawCircle(this.x + this.padding, this.y + this.padding, this.radius);
-                this.drawCircle(this.x + this.width - this.padding, this.y + this.height - this.padding, this.radius);
+                this.drawCircle(context, this.x + this.padding, this.y + this.padding, this.radius);
+                this.drawCircle(context, this.x + this.width - this.padding, this.y + this.height - this.padding, this.radius);
             } else {
-                this.drawCircle(this.x + this.padding, this.y + this.height - this.padding, this.radius);
-                this.drawCircle(this.x + this.width - this.padding, this.y + this.padding, this.radius);
+                this.drawCircle(context, this.x + this.padding, this.y + this.height - this.padding, this.radius);
+                this.drawCircle(context, this.x + this.width - this.padding, this.y + this.padding, this.radius);
             }
             
         } else if (this.n == 3) {
 
-            this.drawCircle(this.x + this.width/2, this.y + this.height/2, this.radius);
+            this.drawCircle(context, this.x + this.width/2, this.y + this.height/2, this.radius);
 
             if (this.rotate == true) {
-                this.drawCircle(this.x + this.padding, this.y + this.padding, this.radius);
-                this.drawCircle(this.x + this.width - this.padding, this.y + this.height - this.padding, this.radius);
+                this.drawCircle(context, this.x + this.padding, this.y + this.padding, this.radius);
+                this.drawCircle(context, this.x + this.width - this.padding, this.y + this.height - this.padding, this.radius);
             } else {
-                this.drawCircle(this.x + this.padding, this.y + this.height - this.padding, this.radius);
-                this.drawCircle(this.x + this.width - this.padding, this.y + this.padding, this.radius);
+                this.drawCircle(context, this.x + this.padding, this.y + this.height - this.padding, this.radius);
+                this.drawCircle(context, this.x + this.width - this.padding, this.y + this.padding, this.radius);
             }
             
         } else if (this.n == 4) {
 
-            this.drawCircle(this.x + this.padding, this.y + this.padding, this.radius);
-            this.drawCircle(this.x + this.width - this.padding, this.y + this.height - this.padding, this.radius);
-            this.drawCircle(this.x + this.padding, this.y + this.height - this.padding, this.radius);
-            this.drawCircle(this.x + this.width - this.padding, this.y + this.padding, this.radius);
+            this.drawCircle(context, this.x + this.padding, this.y + this.padding, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding, this.y + this.height - this.padding, this.radius);
+            this.drawCircle(context, this.x + this.padding, this.y + this.height - this.padding, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding, this.y + this.padding, this.radius);
 
         } else if (this.n == 5) {
             
-            this.drawCircle(this.x + this.width/2, this.y + this.height/2, this.radius);
-            this.drawCircle(this.x + this.padding, this.y + this.padding, this.radius);
-            this.drawCircle(this.x + this.width - this.padding, this.y + this.height - this.padding, this.radius);
-            this.drawCircle(this.x + this.padding, this.y + this.height - this.padding, this.radius);
-            this.drawCircle(this.x + this.width - this.padding, this.y + this.padding, this.radius);
+            this.drawCircle(context, this.x + this.width/2, this.y + this.height/2, this.radius);
+            this.drawCircle(context, this.x + this.padding, this.y + this.padding, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding, this.y + this.height - this.padding, this.radius);
+            this.drawCircle(context, this.x + this.padding, this.y + this.height - this.padding, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding, this.y + this.padding, this.radius);
             
         } else if (this.n == 6) {
 
-            this.drawCircle(this.x + this.padding, this.y + this.padding, this.radius);
-            this.drawCircle(this.x + this.width - this.padding, this.y + this.height - this.padding, this.radius);
-            this.drawCircle(this.x + this.padding, this.y + this.height - this.padding, this.radius);
-            this.drawCircle(this.x + this.width - this.padding, this.y + this.padding, this.radius);
+            this.drawCircle(context, this.x + this.padding, this.y + this.padding, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding, this.y + this.height - this.padding, this.radius);
+            this.drawCircle(context, this.x + this.padding, this.y + this.height - this.padding, this.radius);
+            this.drawCircle(context, this.x + this.width - this.padding, this.y + this.padding, this.radius);
 
             if (this.rotate == true) {
-                this.drawCircle(this.x + this.width/2, this.y + this.padding, this.radius);
-                this.drawCircle(this.x + this.width/2, this.y + this.height - this.padding, this.radius);
+                this.drawCircle(context, this.x + this.width/2, this.y + this.padding, this.radius);
+                this.drawCircle(context, this.x + this.width/2, this.y + this.height - this.padding, this.radius);
             } else {
-                this.drawCircle(this.x + this.padding, this.y + this.height/2, this.radius);
-                this.drawCircle(this.x + this.width - this.padding, this.y + this.height/2, this.radius);
+                this.drawCircle(context, this.x + this.padding, this.y + this.height/2, this.radius);
+                this.drawCircle(context, this.x + this.width - this.padding, this.y + this.height/2, this.radius);
             }
-        }
-
-    }
-
-    update() {
-        if (this.velocity < 2000) {
-            
-            
-            setTimeout(() => { 
-                this.increment();
-                this.draw();
-                
-                console.log(this.velocity + " " + this.acceleration);
-            }, this.velocity);
-            this.velocity *= this.acceleration;
-            
-        } else {
-            this.acceleration = -1;
         }
 
     }
@@ -216,18 +201,36 @@ class Dice {
                 this.n = 1;
             }
             console.log("Dice at (" + Math.floor(this.x/this.width) + ", " + Math.floor(this.y/this.height) +") incremented");
-            this.draw();
         } else {
             console.log("oopsies dice out of bounds here");
         }
     }
 
+    update(context) {
+        if (this.velocity > 1) {
+            
+            
+            setTimeout(() => { 
+
+                this.increment();
+                this.draw(context);
+
+            }, 2000 / this.velocity);
+            this.velocity -= this.acceleration;
+            
+        } 
+        else { 
+            
+        }
+
+    }
+
+
+
     roll() {
-        if (this.acceleration < 0) {
-            this.acceleration = 1.1 + (Math.random() * 0.1);
-            this.velocity = 50 * Math.random() + 20;
-            this.update();
-        }  
+        this.acceleration = .1 + (Math.random() * 0.1);
+        this.velocity = 5 * Math.random() + 20;
+        this.isRolling = true;
     }
 }
 
@@ -296,31 +299,21 @@ function render() {
         for (let j = 0; j < rows; j++) {
 
             if (dice[i][j] != -1 && dice[i][j] != -2 && dice[i][j] != -3) { 
-                dice[i][j].draw();
+                dice[i][j].draw(ctx);
             }
             
-            
-            
-            /*
-            let r = Math.round(Math.random());
-            let color = `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`;
-            
-            if (dice[i][j] > 6) {
-                drawDice(dice[i][j] - 6, i*width + shadowOffset*2, j*height + shadowOffset*2, width*2, height*2, padding*2, radius*2, r, shadowColor);
-                drawDice(dice[i][j] - 6, i*width, j*height, width*2, height*2, padding*2, radius*2, r, color);
-            } else {
-                drawDice(dice[i][j], i*width + shadowOffset, j*height + shadowOffset, width, height, padding, radius, r, shadowColor);
-                drawDice(dice[i][j], i*width, j*height, width, height, padding, radius, r, color);
-            }
-            */
 
-            
-            
         }
     }
 }
 
+function on() {
+    document.getElementById("overlay").style.display = "block";
+}
 
+function off() {
+    document.getElementById("overlay").style.display = "none";
+}
 
 initialize();
 render()
@@ -331,7 +324,7 @@ let updateDice = function() {
     for (let i = 0; i < columns; i++) {
         for (let j = 0; j < rows; j++) {
             if (dice[i][j] != -1 && dice[i][j] != -2 && dice[i][j] != -3) { 
-                dice[i][j].update();
+                dice[i][j].update(ctx);
             }
         }
     }
