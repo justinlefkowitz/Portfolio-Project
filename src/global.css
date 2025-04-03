@@ -15,7 +15,7 @@ body {
 
 #overlay {
     position: fixed;
-    display: block;
+    display: none;
     top: 25%;
     left: 25%;
     width: 50%;

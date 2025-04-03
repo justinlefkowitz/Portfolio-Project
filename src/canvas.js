@@ -7,23 +7,26 @@ canvas.height = window.innerHeight;
 
 
 //set variables
-const width = 20;
-const height = 20;
-var rows = canvas.height / height;
-var columns = canvas.width / width;
+const width = 10;
+const height = 10;
+var rows = Math.round(canvas.height / height);
+var columns = Math.round(canvas.width / width);
 const radius = Math.min(width, height) / 10; 
 const padding = Math.min(width, height) / 5; 
 
-const backgroundColor = "rgb(222,199,160)";
+const topLeftColor = "rgb(3, 252, 190)"   //"rgb(87,12,150)"
+const bottomRightColor = "rgb(204, 35, 219)"   //"rgb(255,255,0)"
 
-const shadowOffset = radius / 2;
+const backgroundColor = "black"//"rgb(222,199,160)";
+
+const shadowOffset =  radius / 2;
 const shadowColor = "black";
 
 const drawBorders = false;
 
-const largeDicePercentage = .05;
+const largeDicePercentage = 0;
 
-const isTargeted = false;
+const isTargeted = true;
 const isRandom = true;
 
 
@@ -232,7 +235,6 @@ class Dice {
         this.target = num;
     }
     
-
     update(context) {
         if (this.velocity > 1) {
             
@@ -252,7 +254,6 @@ class Dice {
             
         } 
         else if (this.isRolling && this.isTargeted) { 
-            console.log("yo");
             this.isRolling = false;
             setTimeout(() => { 
 
@@ -263,8 +264,6 @@ class Dice {
         } 
 
     }
-
-
 
     roll() {
         this.acceleration = .1 + (Math.random() * 0.1);
@@ -314,7 +313,6 @@ document.addEventListener("keydown", (e) => {
 }, { passive: false });
 
 
-
 //resizes canvas on window resize
 window.addEventListener("resize", function (e) {
     canvas.width = window.innerWidth;
@@ -350,22 +348,19 @@ function initializeDiceMatrix() {
         for (let j = 0; j < rows; j++) {
             if (dice[i][j] != -1 && dice[i][j] != -2 && dice[i][j] != -3) {
                 if (Math.random() > (1-largeDicePercentage) && i + 1 < columns && j + 1 < rows && dice[i][j+1] == 0) {
-                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 2, padding, radius, Math.round(Math.random()), `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`, shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
+                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 2, padding, radius, Math.round(Math.random), findColor(i,j), shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
                     dice[i][j+1] = -1;
                     dice[i+1][j] = -2;
                     dice[i+1][j+1] = -3;
                 } else {
-                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 1, padding, radius, Math.round(Math.random()), `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`, shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
+                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 1, padding, radius, Math.round(Math.random()), findColor(i,j), shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
                 }
             }
-            
+
         }
-        
     }
     render()
 }
-
-
 
 //called upon window resizing to generate newdice beyond the window size
 function updateDiceMatrix() {
@@ -379,22 +374,35 @@ function updateDiceMatrix() {
             if (dice[i][j] == undefined) {
     
                 if (Math.random() > (1-largeDicePercentage) && i + 1 < columns && j + 1 < rows && dice[i][j+1] == undefined) {
-                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 2, padding, radius, Math.round(Math.random()), `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`, shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
+                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 2, padding, radius, Math.round(Math.random()), findColor(i,j), shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
                     dice[i][j+1] = -1;
                     dice[i+1][j] = -2;
                     dice[i+1][j+1] = -3;
                 } else {
-                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 1, padding, radius, Math.round(Math.random()), `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`, shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
+                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 1, padding, radius, Math.round(Math.random()), findColor(i,j), shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
                 }
             
             } else if (dice[i][j] != -1 && dice[i][j] != -2 && dice[i][j] != -3) {
-                dice[i][j].setColor(`rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`)
+                dice[i][j].setColor(findColor(i,j));
             }
         }
 
     }
 
 }
+
+//updates all dice to target values and then renders
+function setDiceMatrixToTarget() {
+    for (let i = 0; i < columns; i++) {
+        for (let j = 0; j < rows; j++) {
+            if (dice[i][j] != -1 && dice[i][j] != -2 && dice[i][j] != -3) {
+                dice[i][j].set(dice[i][j].target);
+            }
+        }
+    }
+    render();
+}
+
 
 //renders entire dice matrix
 function render() {
@@ -425,6 +433,92 @@ function updateDice(){
     }
 }
 
+function findColor(i, j) {
+
+    //get the rgb values from topLeftColor
+    const t = {
+        r: parseInt(topLeftColor.split(",")[0].split("(")[1]),
+        g: parseInt(topLeftColor.split(",")[1]),
+        b: parseInt(topLeftColor.split(",")[2].split(")")[0])
+    }
+    const b = {
+        r: parseInt(bottomRightColor.split(",")[0].split("(")[1]),
+        g: parseInt(bottomRightColor.split(",")[1]),
+        b: parseInt(bottomRightColor.split(",")[2].split(")")[0])
+    }
+
+
+
+    
+    
+    return `rgb( 
+    ${t.r + ((b.r - t.r) * ((i + j)/(columns + rows)))},
+    ${t.g + ((b.g - t.g) * ((i + j)/(columns + rows)))},
+    ${t.b + ((b.b - t.b) * ((i + j)/(columns + rows)))})`;
+    
+}
+
+
+
+
+function readImage() {
+    const ca = document.createElement('canvas');
+    const cx = ca.getContext('2d');
+    imgURL = "../images/justin.jpg"
+    img = new Image(columns, rows)
+    img.onload = function() {   
+        console.log(img.width, img.height)
+        ca.width = columns;
+        ca.height = rows;
+
+        var hRatio = ca.width / img.width    ;
+        var vRatio = ca.height / img.height  ;
+        var ratio  = Math.min ( hRatio, vRatio );
+        cx.drawImage(img, 0,0, img.width*ratio, img.height*ratio);
+
+        const imageData = cx.getImageData(0, 0, ca.width, ca.height);
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            if (dice[(i/4) % columns][Math.floor((i/4) / columns)] != -1 && 
+                dice[(i/4) % columns][Math.floor((i/4) / columns)] != -2 && 
+                dice[(i/4) % columns][Math.floor((i/4) / columns)] != -3 && 
+                dice[(i/4) % columns][Math.floor((i/4) / columns)] != undefined) {
+
+                dice[(i/4) % columns][Math.floor((i/4) / columns)].setTarget(Math.floor(((255 - rgbToGrayScale(r, g, b)) / 256) * 6) + 1) ;
+                dice[(i/4) % columns][Math.floor((i/4) / columns)].setColor(`rgb(${r}, ${g}, ${b})`);
+            }
+            
+        }
+
+        setDiceMatrixToTarget();
+    }
+
+    img.src = imgURL;
+
+    
+    //cx.fillStyle = "white"
+    //cx.fillRect(0, 0, img.width, img.height / 2);
+    
+}    
+
+
+function rgbToGrayScale(r, g, b) {
+    return .299 * r + .587 * g + .114 * b;
+}
+
+
+
+
+
+
+
 
 initialize();
 updateDice();
+readImage();
+
+
