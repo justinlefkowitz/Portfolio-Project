@@ -7,10 +7,10 @@ canvas.height = window.innerHeight;
 
 
 //set variables
-const rows = 40;
-const columns = 80;
-const width = canvas.width / columns;
-const height = canvas.height / rows;
+const width = 20;
+const height = 20;
+var rows = canvas.height / height;
+var columns = canvas.width / width;
 const radius = Math.min(width, height) / 10; 
 const padding = Math.min(width, height) / 5; 
 
@@ -21,13 +21,23 @@ const shadowColor = "black";
 
 const drawBorders = false;
 
+const largeDicePercentage = .05;
+
+const isTargeted = false;
+const isRandom = true;
+
+
 var dice;
+
+
+
+
 
 
 //Dice class with constructor, draw and roll methods
 class Dice {
 
-    constructor(n, x, y, size, padding, radius, rotate, color, shadowOffset, shadowColor, isBorder) {
+    constructor(n, x, y, size, padding, radius, rotate, color, shadowOffset, shadowColor, isBorder, isTargeted, isRandom) {
         this.n = n;
         this.x = x;
         this.y = y;
@@ -42,10 +52,9 @@ class Dice {
         this.width = width * size;
         this.height = height * size;
 
-        let velocity;
-        let acceleration;
-        let target = n;
-        let isRolling = false;
+        this.target = 6;
+        this.isTargeted = isTargeted;
+        this.isRandom = isRandom;
 
     }
 
@@ -206,22 +215,52 @@ class Dice {
         }
     }
 
+    random() {
+        this.n = Math.round(6 * Math.random() + .5);
+        this.rotate = Math.round(Math.random());
+    }
+
+    setColor(color) {
+        this.color = color
+    }
+
+    set(num) {
+        this.n = num;
+    }
+
+    setTarget(num) {
+        this.target = num;
+    }
+    
+
     update(context) {
         if (this.velocity > 1) {
             
             
             setTimeout(() => { 
 
-                this.increment();
+                if (this.isRandom) {
+                    this.random();
+                } else {
+                    this.increment();
+                }
+                
                 this.draw(context);
 
             }, 2000 / this.velocity);
             this.velocity -= this.acceleration;
             
         } 
-        else { 
-            
-        }
+        else if (this.isRolling && this.isTargeted) { 
+            console.log("yo");
+            this.isRolling = false;
+            setTimeout(() => { 
+
+                this.set(this.target);
+                this.draw(context);
+
+            }, 2000);
+        } 
 
     }
 
@@ -257,9 +296,44 @@ canvas.addEventListener("click", function (e) {
     
 });
 
+//prevents window resizing by wheel
+document.addEventListener("wheel", (e) => {
+    if (e.ctrlKey) {
+        e.preventDefault();
+    }
+        
     
-//sets dice matrix
+}, { passive: false });
+
+
+//prevent window resizing using crtl + plus or crtl + minus
+document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=') || (e.key === '_' )) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+
+
+//resizes canvas on window resize
+window.addEventListener("resize", function (e) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    columns = canvas.width / width;
+    rows = canvas.height / height;
+    updateDiceMatrix();
+    render()
+}, { passive: true });
+
+
+
 function initialize() {
+    initializeDiceMatrix()
+    render();
+}
+
+//initialize dice matrix to random values on page load
+function initializeDiceMatrix() {
     dice = []
 
     for (let i = 0; i < columns; i++) {
@@ -271,23 +345,55 @@ function initialize() {
         } 
     }
 
+    
     for (let i = 0; i < columns; i++) {
         for (let j = 0; j < rows; j++) {
             if (dice[i][j] != -1 && dice[i][j] != -2 && dice[i][j] != -3) {
-                if (Math.random() > .92 && i + 1 < columns && j + 1 < rows && dice[i][j+1] == 0) {
-                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 2, padding, radius, Math.round(Math.random()), `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`, shadowOffset, shadowColor, drawBorders);
+                if (Math.random() > (1-largeDicePercentage) && i + 1 < columns && j + 1 < rows && dice[i][j+1] == 0) {
+                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 2, padding, radius, Math.round(Math.random()), `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`, shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
                     dice[i][j+1] = -1;
                     dice[i+1][j] = -2;
                     dice[i+1][j+1] = -3;
                 } else {
-                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 1, padding, radius, Math.round(Math.random()), `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`, shadowOffset, shadowColor, drawBorders);
+                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 1, padding, radius, Math.round(Math.random()), `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`, shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
                 }
             }
             
         }
         
     }
-    console.log(dice);
+    render()
+}
+
+
+
+//called upon window resizing to generate newdice beyond the window size
+function updateDiceMatrix() {
+
+    for (let i = 0; i < columns; i++) {
+        if (dice[i+1] == undefined) {
+            dice[i+1] = [];
+
+        }
+        for (let j = 0; j < rows; j++) {
+            if (dice[i][j] == undefined) {
+    
+                if (Math.random() > (1-largeDicePercentage) && i + 1 < columns && j + 1 < rows && dice[i][j+1] == undefined) {
+                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 2, padding, radius, Math.round(Math.random()), `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`, shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
+                    dice[i][j+1] = -1;
+                    dice[i+1][j] = -2;
+                    dice[i+1][j+1] = -3;
+                } else {
+                    dice[i][j] = new Dice(Math.round(6 * Math.random() + .5), i*width, j*height, 1, padding, radius, Math.round(Math.random()), `rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`, shadowOffset, shadowColor, drawBorders, isTargeted, isRandom);
+                }
+            
+            } else if (dice[i][j] != -1 && dice[i][j] != -2 && dice[i][j] != -3) {
+                dice[i][j].setColor(`rgb( ${87 + (168 * ((i + j)/(columns + rows)))},${12 + (243 * ((i + j)/(columns + rows)))},${160 - (160 * ((i + j)/(columns + rows)))})`)
+            }
+        }
+
+    }
+
 }
 
 //renders entire dice matrix
@@ -307,27 +413,18 @@ function render() {
     }
 }
 
-function on() {
-    document.getElementById("overlay").style.display = "block";
-}
-
-function off() {
-    document.getElementById("overlay").style.display = "none";
-}
-
-initialize();
-render()
-
-
-let updateDice = function() {
+//animation loop that updates dice based on their state, and requests the next animation frame
+function updateDice(){
     requestAnimationFrame(updateDice);
     for (let i = 0; i < columns; i++) {
         for (let j = 0; j < rows; j++) {
-            if (dice[i][j] != -1 && dice[i][j] != -2 && dice[i][j] != -3) { 
+            if (dice[i][j].isRolling) { 
                 dice[i][j].update(ctx);
             }
         }
     }
 }
 
+
+initialize();
 updateDice();
