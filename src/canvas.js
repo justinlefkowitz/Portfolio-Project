@@ -14,10 +14,10 @@ var columns = Math.round(canvas.width / width);
 const radius = Math.min(width, height) / 10; 
 const padding = Math.min(width, height) / 5; 
 
-const topLeftColor = "rgb(3, 252, 190)"   //"rgb(87,12,150)"
+const topLeftColor = "rgb(0, 0, 0)"   //"rgb(87,12,150)"
 const bottomRightColor = "rgb(204, 35, 219)"   //"rgb(255,255,0)"
 
-const backgroundColor = "black"//"rgb(222,199,160)";
+const backgroundColor = "gray"//"rgb(222,199,160)";
 
 const shadowOffset =  radius / 2;
 const shadowColor = "black";
@@ -471,7 +471,7 @@ function readImage() {
         ca.width = columns;
         ca.height = rows;
 
-        var hRatio = ca.width / img.width    ;
+        var hRatio = ca.width / img.width;
         var vRatio = ca.height / img.height  ;
         var ratio  = Math.min ( hRatio, vRatio );
         cx.drawImage(img, 0,0, img.width*ratio, img.height*ratio);
@@ -489,7 +489,7 @@ function readImage() {
                 dice[(i/4) % columns][Math.floor((i/4) / columns)] != undefined) {
 
                 dice[(i/4) % columns][Math.floor((i/4) / columns)].setTarget(Math.floor(((255 - rgbToGrayScale(r, g, b)) / 256) * 6) + 1) ;
-                dice[(i/4) % columns][Math.floor((i/4) / columns)].setColor(`rgb(${r}, ${g}, ${b})`);
+                //dice[(i/4) % columns][Math.floor((i/4) / columns)].setColor(`rgb(${r}, ${g}, ${b})`);
             }
             
         }
