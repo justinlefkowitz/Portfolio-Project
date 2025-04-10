@@ -8,16 +8,16 @@ canvas.height = window.innerHeight;
 
 //set variables
 const width = 10;
-const height = 10;
+const height = width;
 var rows = Math.round(canvas.height / height);
 var columns = Math.round(canvas.width / width);
 const radius = Math.min(width, height) / 10; 
 const padding = Math.min(width, height) / 5; 
 
-const topLeftColor = "rgb(0, 0, 0)"   //"rgb(87,12,150)"
-const bottomRightColor = "rgb(204, 35, 219)"   //"rgb(255,255,0)"
+const topLeftColor = "rgb(255, 255, 255)"   //"rgb(87,12,150)"
+const bottomRightColor = "rgb(255, 255, 255)"   //"rgb(255,255,0)"
 
-const backgroundColor = "gray"//"rgb(222,199,160)";
+const backgroundColor = "rgb(222,199,160)";
 
 const shadowOffset =  radius / 2;
 const shadowColor = "black";
@@ -320,6 +320,7 @@ window.addEventListener("resize", function (e) {
     columns = canvas.width / width;
     rows = canvas.height / height;
     updateDiceMatrix();
+    readImage()
     render()
 }, { passive: true });
 
@@ -464,7 +465,7 @@ function findColor(i, j) {
 function readImage() {
     const ca = document.createElement('canvas');
     const cx = ca.getContext('2d');
-    imgURL = "../images/justin.jpg"
+    imgURL = "./images/japan.png"
     img = new Image(columns, rows)
     img.onload = function() {   
         console.log(img.width, img.height)
@@ -489,7 +490,7 @@ function readImage() {
                 dice[(i/4) % columns][Math.floor((i/4) / columns)] != undefined) {
 
                 dice[(i/4) % columns][Math.floor((i/4) / columns)].setTarget(Math.floor(((255 - rgbToGrayScale(r, g, b)) / 256) * 6) + 1) ;
-                //dice[(i/4) % columns][Math.floor((i/4) / columns)].setColor(`rgb(${r}, ${g}, ${b})`);
+                dice[(i/4) % columns][Math.floor((i/4) / columns)].setColor(`rgb(${r}, ${g}, ${b})`);
             }
             
         }

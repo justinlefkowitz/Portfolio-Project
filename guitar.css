@@ -1,0 +1,180 @@
+html {
+    height: 100%;
+}
+
+button {
+    all: unset;
+    width: 100%;
+    height: 100%;
+
+}
+
+
+body {
+    margin: 0;
+    height: 100%;
+    background: linear-gradient(to bottom, tan, beige);
+    overflow: hidden;
+    z-index: 0;
+}
+
+
+#guitar-container {
+    border: 1px solid black;
+    position: absolute;
+    width: 100%;
+    height: 50%;
+    translate: 0 50%;
+    z-index: 1;
+}
+
+.string-container {
+    position: absolute;
+
+    display: block;
+    width: 87.5%;
+    height: 16.333%;
+    z-index: 3;
+    margin: 0;
+
+    transition-timing-function: ease;
+    transition-duration: .5s;;
+
+}
+
+.string-container:hover {
+    background-color: blue;
+}
+
+.string {
+    position: absolute;
+    width: 100%;
+    height: 5%;
+    background-color: silver;
+    top: 50%;
+    left: 0;
+    translate: 0 -50%
+}
+
+
+#e {
+    top: 0;
+}
+#b {
+    top: 16.67%;
+}
+#g {
+    top: 33.33%;
+}
+#d {
+    top: 50%;
+}
+#a {
+    top: 66.67%;
+}
+#E {
+    top: 83.33%;
+}
+
+#E div {
+    height: 11%;
+    background-color: coral;
+}
+
+
+
+
+
+
+
+
+.bridge {
+    background-color: gray;
+    display: block;
+    position: absolute;
+    width: 5%;
+    height: 100%;
+    top: 0;
+    left: 85%;
+    z-index: 2;
+
+}
+
+.hole {
+    background-color: black;
+    position: absolute;
+    width: 55vh;
+    height: 55vh;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.pin {
+    background: radial-gradient(circle, black, rgb(56, 54, 54));
+    box-shadow: 0 0 10px black;
+
+    position: absolute;
+    width: 1vw;
+    height: 1vw;
+    border-radius: 50%;
+    translate: -50% -50%;
+    z-index: 5;
+
+}
+
+#pin1 {
+    top: 8.33%;
+    left: 87.5%;
+}
+#pin2 {
+    top: 25%;
+    left: 87.5%;
+}
+#pin3 {
+    top: 41.67%;
+    left: 87.5%;
+}
+#pin4 {
+    top: 58.33%;
+    left: 87.5%;
+}
+#pin5 {
+    top: 75%;
+    left: 87.5%;
+}
+#pin6 {
+    top: 91.67%;
+    left: 87.5%;
+}
+
+
+
+
+@keyframes spin {
+    0% {
+
+    }
+
+    50% {
+        scale: 0.5;
+        transform: rotate(0);
+        border-radius: 0;
+    }
+    100% {
+        transform: rotate(360deg);
+        scale: 1;
+    }
+}
+
+@keyframes enterRight {
+    0% {
+        transform: translateX(150%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
